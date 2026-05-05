@@ -13,6 +13,9 @@
                     <input type="text" name="leave_type_name" class="form-input" list="leave-types" required placeholder="Select or type a new leave type...">
                     <datalist id="leave-types">
                         @foreach($types as $type)
+                            @if($type->code === 'ML' && strtolower(auth()->user()->gender ?? '') !== 'female')
+                                @continue
+                            @endif
                             <option value="{{ $type->name }}"></option>
                         @endforeach
                     </datalist>

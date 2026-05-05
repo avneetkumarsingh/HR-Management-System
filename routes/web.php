@@ -225,6 +225,18 @@ Route::middleware('auth')->group(function () {
         })->name('logins');
     });
 
+    // HR Roles & Permissions
+    Route::get('/hr/roles', [\App\Http\Controllers\RolePermissionController::class, 'index'])->name('roles.index');
+    Route::post('/hr/roles', [\App\Http\Controllers\RolePermissionController::class, 'update'])->name('roles.update');
+    Route::post('/hr/roles/store-role', [\App\Http\Controllers\RolePermissionController::class, 'storeRole'])->name('roles.store_role');
+    Route::post('/hr/roles/store-permission', [\App\Http\Controllers\RolePermissionController::class, 'storePermission'])->name('roles.store_permission');
+    
+    // Role/Permission inline edit & delete 
+    Route::put('/hr/roles/update-role/{id}', [\App\Http\Controllers\RolePermissionController::class, 'updateRole'])->name('roles.update_role');
+    Route::delete('/hr/roles/destroy-role/{id}', [\App\Http\Controllers\RolePermissionController::class, 'destroyRole'])->name('roles.destroy_role');
+    Route::put('/hr/roles/update-permission/{id}', [\App\Http\Controllers\RolePermissionController::class, 'updatePermission'])->name('roles.update_permission');
+    Route::delete('/hr/roles/destroy-permission/{id}', [\App\Http\Controllers\RolePermissionController::class, 'destroyPermission'])->name('roles.destroy_permission');
+    
     // Employees
     Route::resource('employees', EmployeeController::class); 
 

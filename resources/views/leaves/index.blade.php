@@ -9,6 +9,9 @@
 
 <div class="grid grid-cols-3 gap-6 margin-bottom-2rem">
     @forelse($balances as $balance)
+    @if($balance->type->code === 'ML' && strtolower(auth()->user()->gender ?? '') !== 'female')
+        @continue
+    @endif
     <div class="card leave-card" style="--card-color: {{ $balance->type->color ?? 'var(--primary)' }}; margin-bottom:0">
         <div class="card-body">
             <h4 style="margin:0 0 1rem">{{ $balance->type->name }}</h4>

@@ -122,6 +122,9 @@
 <div id="leaves" class="tab-pane">
     <div class="grid grid-cols-3 gap-4 mb-4">
         @foreach($employee->leaveBalances as $bal)
+        @if($bal->type->code === 'ML' && strtolower($employee->gender ?? '') !== 'female')
+            @continue
+        @endif
         <div class="card" style="border-left: 4px solid {{ $bal->type->color ?? 'var(--primary)' }}; margin-bottom:0">
             <div class="card-body p-4 text-center">
                 <h4 style="margin:0 0 0.5rem; font-size:1rem">{{ $bal->type->code }}</h4>

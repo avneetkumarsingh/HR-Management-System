@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name', 'AttendMS') }}</title>
+    <title>{{ config('app.name', 'Walkwel AttendMS') }}</title>
     <!-- CSS -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,12 +17,8 @@
         }
         
         @media (min-width: 769px) {
-            .sidebar.show { width: 80px; }
-            .sidebar.show .nav-item span,
-            .sidebar.show .sidebar-logo span,
-            .sidebar.show .nav-section,
-            .sidebar.show .user-info { display: none; }
-            .sidebar.show ~ .main-wrapper { margin-left: 80px; }
+            .sidebar.show { width: 0; overflow: hidden; border: none; padding: 0; margin: 0; }
+            .sidebar.show ~ .main-wrapper { margin-left: 0; }
         }
     </style>
 </head>
@@ -46,82 +42,134 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    <span>AttendMS</span>
+                <div class="sidebar-logo" style="display: flex; align-items: center; gap: 12px; padding: 10px 0;">
+                    <svg width="42" height="42" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style="flex-shrink: 0;">
+                      <g fill="white" stroke="white" stroke-width="13" stroke-linecap="round">
+                        <line x1="28" y1="38" x2="46" y2="82" />
+                        <line x1="48" y1="38" x2="66" y2="82" />
+                        <circle cx="76" cy="38" r="6.5" stroke="none" />
+                        <line x1="92" y1="38" x2="92" y2="82" />
+                        <circle cx="108" cy="38" r="6.5" stroke="none" />
+                      </g>
+                    </svg>
+                    <div style="display: flex; flex-direction: column; line-height: 1.2; padding-top: 2px;">
+                        <span style="font-size: 1.15rem; font-weight: 700; color: white;">Walkwel</span>
+                        <span style="font-size: 1.15rem; font-weight: 700; color: white;">AttendMS</span>
+                    </div>
                 </div>
             </div>
 
             <nav class="sidebar-nav">
-                <div class="nav-section">Main</div>
-                <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    Dashboard
-                </a>
-                
-                <div class="nav-section">Attendance</div>
-                <a href="{{ route('attendance.index') }}" class="nav-item {{ request()->routeIs('attendance.index') ? 'active' : '' }}">
-                    My Attendance
-                </a>
-                <a href="{{ route('attendance.calendar') }}" class="nav-item {{ request()->routeIs('attendance.calendar') ? 'active' : '' }}">
-                    Calendar
-                </a>
-                <a href="{{ route('regularization.index') }}" class="nav-item {{ request()->routeIs('regularization.*') ? 'active' : '' }}">
-                    Regularization
-                </a>
-                @if(auth()->user()->hasAnyRole(['manager', 'admin', 'hr', 'super_admin']))
-                    <a href="{{ route('attendance.team') }}" class="nav-item {{ request()->routeIs('attendance.team') ? 'active' : '' }}">
-                        Team Attendance
+                <style>
+                    .nav-section { cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+                    .nav-group { overflow: hidden; transition: max-height 0.3s ease; }
+                    .nav-section i.caret { transition: transform 0.3s ease; }
+                    .nav-section.collapsed i.caret { transform: rotate(-90deg); }
+                </style>
+                <script>
+                    function toggleNavGroup(id, element) {
+                        const group = document.getElementById(id);
+                        if (group) {
+                            if (group.style.maxHeight && group.style.maxHeight !== '0px') {
+                                group.style.maxHeight = '0px';
+                                element.classList.add('collapsed');
+                            } else {
+                                group.style.maxHeight = group.scrollHeight + 'px';
+                                element.classList.remove('collapsed');
+                            }
+                        }
+                    }
+                    
+                    document.addEventListener('DOMContentLoaded', function() {
+                        document.querySelectorAll('.nav-group').forEach(group => {
+                            if (!group.querySelector('.nav-item.active')) { 
+                                group.style.maxHeight = '0px';
+                                const section = group.previousElementSibling;
+                                if(section && section.classList.contains('nav-section')) section.classList.add('collapsed');
+                            } else {
+                                group.style.maxHeight = group.scrollHeight + 'px';
+                            }
+                        });
+                    });
+                </script>
+
+                <div class="nav-section" onclick="toggleNavGroup('nav-main', this)">Main <i class="fas fa-chevron-down caret"></i></div>
+                <div id="nav-main" class="nav-group">
+                    <a href="{{ route('dashboard') }}" class="nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                        Dashboard
                     </a>
-                @endif
+                </div>
                 
-                <div class="nav-section">Leave</div>
-                <a href="{{ route('leaves.index') }}" class="nav-item {{ request()->routeIs('leaves.index') ? 'active' : '' }}">
-                    My Leaves
-                    @php $empApproved = \App\Models\LeaveRequest::where('user_id', auth()->id())->where('status', 'approved')->where('updated_at', '>', session('last_seen_leaves_at', now()->subDays(3)))->count(); @endphp
-                    @if($empApproved > 0) <span style="margin-left:auto; background:#10b981; box-shadow: 0 0 8px #10b981; width:8px; height:8px; border-radius:50%; display:inline-block;" title="Leave successfully approved recently!"></span> @endif
-                </a>
-                <a href="{{ route('holidays.index') }}" class="nav-item {{ request()->routeIs('holidays.index') ? 'active' : '' }}">
-                    Holidays
-                </a>
+                <div class="nav-section" onclick="toggleNavGroup('nav-my-data', this)">My Data <i class="fas fa-chevron-down caret"></i></div>
+                <div id="nav-my-data" class="nav-group">
+                    <a href="{{ route('attendance.index') }}" class="nav-item {{ request()->routeIs('attendance.index') ? 'active' : '' }}">
+                        My Attendance
+                    </a>
+                    <a href="{{ route('attendance.calendar') }}" class="nav-item {{ request()->routeIs('attendance.calendar') ? 'active' : '' }}">
+                        Calendar
+                    </a>
+                    <a href="{{ route('regularization.index') }}" class="nav-item {{ request()->routeIs('regularization.*') ? 'active' : '' }}">
+                        Regularization
+                    </a>
+                    <a href="{{ route('leaves.index') }}" class="nav-item {{ request()->routeIs('leaves.index') ? 'active' : '' }}">
+                        My Leaves
+                        @php $empApproved = \App\Models\LeaveRequest::where('user_id', auth()->id())->where('status', 'approved')->where('updated_at', '>', session('last_seen_leaves_at', now()->subDays(3)))->count(); @endphp
+                        @if($empApproved > 0) <span style="margin-left:auto; background:#10b981; box-shadow: 0 0 8px #10b981; width:8px; height:8px; border-radius:50%; display:inline-block;" title="Leave successfully approved recently!"></span> @endif
+                    </a>
+                    <a href="{{ route('holidays.index') }}" class="nav-item {{ request()->routeIs('holidays.index') ? 'active' : '' }}">
+                        Holidays
+                    </a>
+                </div>
 
                 @if(auth()->user()->hasAnyRole(['manager', 'admin', 'hr', 'super_admin']))
-                    <div class="nav-section">Approvals</div>
-                    <a href="{{ route('leaves.approvals') }}" class="nav-item {{ request()->routeIs('leaves.approvals') ? 'active' : '' }}">
-                        Leave Approvals
-                        @php 
-                            if(auth()->user()->hasAnyRole(['hr', 'admin', 'super_admin'])) {
-                                $pc = \App\Models\LeaveRequest::where('status', 'pending')->count(); 
-                            } else {
-                                $pc = \App\Models\LeaveRequest::whereIn('user_id', \App\Models\User::where('manager_id', auth()->id())->pluck('id'))->where('status', 'pending')->count();
-                            }
-                        @endphp
-                        @if($pc > 0) <span style="margin-left:auto; background:#10b981; box-shadow: 0 0 8px #10b981; color:white; padding:2px 6px; border-radius:10px; font-size:10px;">{{ $pc }} New</span> @endif
-                    </a>
-                    <a href="{{ route('regularization.approvals') }}" class="nav-item {{ request()->routeIs('regularization.approvals') ? 'active' : '' }}">
-                        Reg. Approvals
-                    </a>
-                    <a href="{{ route('hr.probations') }}" class="nav-item {{ request()->routeIs('hr.probations') ? 'active' : '' }}">
-                        Team Performance
-                    </a>
+                    <div class="nav-section" onclick="toggleNavGroup('nav-approvals', this)">Team & Approvals <i class="fas fa-chevron-down caret"></i></div>
+                    <div id="nav-approvals" class="nav-group">
+                        <a href="{{ route('attendance.team') }}" class="nav-item {{ request()->routeIs('attendance.team') ? 'active' : '' }}">
+                            Team Attendance
+                        </a>
+                        <a href="{{ route('leaves.approvals') }}" class="nav-item {{ request()->routeIs('leaves.approvals') ? 'active' : '' }}">
+                            Leave Approvals
+                            @php 
+                                if(auth()->user()->hasAnyRole(['hr', 'admin', 'super_admin'])) {
+                                    $pc = \App\Models\LeaveRequest::where('status', 'pending')->count(); 
+                                } else {
+                                    $pc = \App\Models\LeaveRequest::whereIn('user_id', \App\Models\User::where('manager_id', auth()->id())->pluck('id'))->where('status', 'pending')->count();
+                                }
+                            @endphp
+                            @if($pc > 0) <span style="margin-left:auto; background:#10b981; box-shadow: 0 0 8px #10b981; color:white; padding:2px 6px; border-radius:10px; font-size:10px;">{{ $pc }} New</span> @endif
+                        </a>
+                        <a href="{{ route('regularization.approvals') }}" class="nav-item {{ request()->routeIs('regularization.approvals') ? 'active' : '' }}">
+                            Reg. Approvals
+                        </a>
+                        <a href="{{ route('hr.probations') }}" class="nav-item {{ request()->routeIs('hr.probations') ? 'active' : '' }}">
+                            Team Performance
+                        </a>
+                    </div>
                 @endif
 
                 @if(auth()->user()->hasAnyRole(['admin', 'hr', 'super_admin']))
-                    <div class="nav-section">Admin</div>
-                    <a href="{{ route('org.dashboard') }}" class="nav-item {{ request()->routeIs('org.dashboard') ? 'active' : '' }}">
-                        Org Dashboard
-                        @if(isset($pc) && $pc > 0) <span style="margin-left:auto; background:#10b981; box-shadow: 0 0 8px #10b981; width:8px; height:8px; border-radius:50%; display:inline-block;" title="Leaves Pending"></span> @endif
-                    </a>
-                    <a href="{{ route('employees.index') }}" class="nav-item {{ request()->routeIs('employees.*') ? 'active' : '' }}">
-                        Employees
-                    </a>
-                    <a href="{{ route('attendance.report') }}" class="nav-item {{ request()->routeIs('attendance.report') ? 'active' : '' }}">
-                        Daily Report
-                    </a>
-                    <a href="{{ route('leaves.types') }}" class="nav-item {{ request()->routeIs('leaves.types') ? 'active' : '' }}">
-                        Leave Types
-                    </a>
-                    <a href="{{ route('reports.summary') }}" class="nav-item {{ request()->routeIs('reports.*') ? 'active' : '' }}">
-                        Analytics
-                    </a>
+                    <div class="nav-section" onclick="toggleNavGroup('nav-admin', this)">HR Administration <i class="fas fa-chevron-down caret"></i></div>
+                    <div id="nav-admin" class="nav-group">
+                        <a href="{{ route('org.dashboard') }}" class="nav-item {{ request()->routeIs('org.dashboard') ? 'active' : '' }}">
+                            Org Dashboard  
+                            @if(isset($pc) && $pc > 0) <span style="margin-left:auto; background:#10b981; box-shadow: 0 0 8px #10b981; width:8px; height:8px; border-radius:50%; display:inline-block;" title="Leaves Pending"></span> @endif
+                        </a>
+                        <a href="{{ route('employees.index') }}" class="nav-item {{ request()->routeIs('employees.*') ? 'active' : '' }}">
+                            Employees
+                        </a>
+                        <a href="{{ route('roles.index') }}" class="nav-item {{ request()->routeIs('roles.index') ? 'active' : '' }}">
+                            Roles & Permissions
+                        </a>
+                        <a href="{{ route('attendance.report') }}" class="nav-item {{ request()->routeIs('attendance.report') ? 'active' : '' }}">
+                            Daily Report
+                        </a>
+                        <a href="{{ route('leaves.types') }}" class="nav-item {{ request()->routeIs('leaves.types') ? 'active' : '' }}">
+                            Leave Types
+                        </a> 
+                        <a href="{{ route('reports.summary') }}" class="nav-item {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                            Analytics
+                        </a>
+                    </div>
                 @endif
             </nav>
 

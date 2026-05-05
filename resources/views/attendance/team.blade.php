@@ -9,33 +9,74 @@
     </form>
 </div>
 
-<div class="grid grid-cols-3 gap-6">
-    @forelse($team as $member)
-        @php $att = $member->attendances->first(); @endphp
-        <div class="card" style="margin-bottom:0">
-            <div class="card-body" style="text-align:center">
-                <img src="{{ $member->avatar_url }}" alt="av" style="width:80px; height:80px; border-radius:50%; margin-bottom:1rem">
-                <h4 style="margin:0">{{ $member->name }}</h4>
-                <p class="text-muted text-sm mb-4">{{ $member->designation->name ?? 'N/A' }}</p>
-                
-                <span class="badge badge-{{ $att ? str_replace(' ', '_', $att->status) : 'absent' }}" style="display:block; margin-bottom:1rem">
-                    {{ $att ? ucfirst(str_replace('_', ' ', $att->status)) : 'Absent' }}
-                </span>
+@php
+    $groupedTeam = $team->groupBy(function($m) { return $m->department->name ?? 'Unassigned'; });
+@endphp
 
-                <div class="grid grid-cols-2 gap-2" style="border-top:1px solid var(--border); padding-top:1rem; text-align:left">
-                    <div>
-                        <div class="text-muted text-sm">Check In</div>
-                        <div class="font-bold">{{ $att && $att->check_in ? \Carbon\Carbon::parse($att->check_in)->format('H:i') : '--:--' }}</div>
-                    </div>
-                    <div>
-                        <div class="text-muted text-sm">Check Out</div>
-                        <div class="font-bold">{{ $att && $att->check_out ? \Carbon\Carbon::parse($att->check_out)->format('H:i') : '--:--' }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @empty
-        <div style="grid-column: span 3" class="text-center text-muted p-4">No team members found.</div>
-    @endforelse
+<style>
+    .rotate-180 { transform: rotate(180deg); }
+    .hidden-block { display: none !important; }
+</style>
+
+@forelse($groupedTeam as $groupName => $members)
+<div class="card mb-6">
+    <div class="card-header" style="background: rgba(0,0,0,0.02); cursor: pointer;" onclick="document.getElementById('team-{{ \Illuminate\Support\Str::slug($groupName) }}').classList.toggle('hidden-block'); this.querySelector('i').classList.toggle('rotate-180')">
+        <h3 class="card-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <span>{{ $groupName }} <span class="badge" style="background:var(--border); margin-left:10px">{{ count($members) }} Members</span></span>
+            <i class="fas fa-chevron-down rotate-180" style="transition: transform 0.3s ease;"></i>
+        </h3>
+    </div>
+    <div id="team-{{ \Illuminate\Support\Str::slug($groupName) }}" class="table-responsive hidden-block">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="width:280px">Employee</th>
+                    <th>Status</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th style="text-align:right">Total Hours</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($members as $member)
+                    @php $att = $member->attendances->first(); @endphp
+                    <tr>
+                        <td>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <img src="{{ $member->avatar_url }}" alt="avatar" style="width:40px; height:40px; border-radius:50%; object-fit:cover; background:#fff">
+                                <div>
+                                    <div style="font-weight:600;">{{ $member->name }}</div>
+                                    <div style="font-size:0.75rem; color:var(--text-muted)">{{ $member->designation->name ?? 'N/A' }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{{ $att ? str_replace(' ', '_', $att->status) : 'absent' }}">
+                                {{ $att ? ucfirst(str_replace('_', ' ', $att->status)) : 'Absent' }}
+                            </span>
+                        </td>
+                        <td style="font-variant-numeric:tabular-nums; font-weight:600; color:var(--text)">
+                            {{ $att && $att->check_in ? \Carbon\Carbon::parse($att->check_in)->format('H:i') : '--:--' }}
+                        </td>
+                        <td style="font-variant-numeric:tabular-nums; font-weight:600; color:var(--text)">
+                            {{ $att && $att->check_out ? \Carbon\Carbon::parse($att->check_out)->format('H:i') : '--:--' }}
+                        </td>
+                        <td style="text-align:right; font-variant-numeric:tabular-nums; font-weight:500;">
+                            @if($att && $att->working_hours)
+                                {{ number_format($att->working_hours, 1) }} hrs
+                            @else
+                                -
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>
+@empty
+<div class="card p-8 text-center text-muted" style="border: 2px dashed var(--border)">
+    No team attendance records found for this date.
+</div>
+@endforelse
 @endsection
