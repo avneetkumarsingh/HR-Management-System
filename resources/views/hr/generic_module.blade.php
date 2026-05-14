@@ -3,18 +3,21 @@
 
 @section('content')
 <div class="card mb-4" style="border-top: 4px solid var(--primary);">
-    <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <button onclick="history.back()" class="btn btn-outline btn-sm" style="border:none; border-radius:50%; width:35px; height:35px; padding:0; display:flex; align-items:center; justify-content:center;" title="Go Back">
+    <div class="card-header mobile-toggle-header" style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding: 1rem 0.75rem;" onclick="if(event.target.closest('.action-btn')) return; const b = this.nextElementSibling; const isHidden = window.getComputedStyle(b).display === 'none'; b.style.display = isHidden ? 'block' : 'none'; this.querySelector('.mobile-chevron').style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';">
+        <div style="display: flex; align-items: center; gap: 0.5rem; overflow: hidden;">
+            <button onclick="history.back()" class="btn btn-outline btn-sm action-btn" style="border:none; border-radius:50%; width:32px; height:32px; flex-shrink:0; padding:0; display:flex; align-items:center; justify-content:center;" title="Go Back">
                 <i class="fas fa-arrow-left"></i>
             </button>
-            <h3 class="card-title" style="margin: 0;"><i class="fas {{ $icon }} text-primary mr-2"></i> {{ $title }}</h3>
+            <h3 class="card-title" style="margin: 0; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center;"><i class="fas {{ $icon }} text-primary" style="margin-right:0.5rem;"></i> {{ $title }}</h3>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="document.getElementById('addForm').style.display = 'block'">
-            <i class="fas fa-plus"></i> Add New
-        </button>
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-shrink:0;">
+            <i class="fas fa-chevron-down mobile-chevron" style="transition:0.3s; transform:rotate(-90deg);"></i>
+            <button class="btn btn-primary btn-sm action-btn" onclick="document.getElementById('addForm').style.display = 'block'" style="white-space: nowrap; padding: 0.35rem 0.6rem;">
+                <i class="fas fa-plus"></i> <span class="desktop-text">New</span>
+            </button>
+        </div>
     </div>
-    <div class="card-body">
+    <div class="card-body mobile-collapsible-body" style="padding-top: 1rem;">
         
         <!-- Add Form (Hidden by default) -->
         <div id="addForm" style="display:none; padding:1.5rem; background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:2rem;">

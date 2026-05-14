@@ -56,13 +56,14 @@ class EmployeeController extends Controller
         $designations = Designation::all();
         $managers = User::role(['manager', 'hr'])->get();
         $shifts = Shift::all();
+        $roles = \Spatie\Permission\Models\Role::all(); // Fetch dynamic roles
         
         // Auto generate employee_id
         $lastEmp = User::orderBy('id', 'desc')->first();
         $nextId = $lastEmp ? (int) str_replace('EMP', '', $lastEmp->employee_id) + 1 : 1;
         $autoEmployeeId = 'EMP' . str_pad($nextId, 4, '0', STR_PAD_LEFT);
 
-        return view('employees.create', compact('departments', 'designations', 'managers', 'shifts', 'autoEmployeeId'));
+        return view('employees.create', compact('departments', 'designations', 'managers', 'shifts', 'autoEmployeeId', 'roles'));
     }
 
     public function store(Request $request)
@@ -77,7 +78,7 @@ class EmployeeController extends Controller
             'children_count' => 'nullable|integer|min:0',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'employee_id' => 'required|string|unique:users',
-            'role' => 'required|in:hr,manager,employee',
+            'role' => 'required|string',
             'department_id' => 'required|exists:departments,id',
             'designation_id' => 'required|exists:designations,id',
             'manager_id' => 'nullable|exists:users,id',
@@ -87,8 +88,11 @@ class EmployeeController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
+        $dynamicRole = $validated['role'];
+        $validated['role'] = in_array($dynamicRole, ['super_admin', 'admin', 'hr', 'manager', 'employee']) ? $dynamicRole : 'employee';
+
         $user = new User($validated);
-        if (in_array($validated['role'], ['manager', 'hr'])) {
+        if (in_array($dynamicRole, ['manager', 'hr'])) {
             $user->manager_id = null;
         }
         $user->password = Hash::make($validated['password']);
@@ -98,7 +102,7 @@ class EmployeeController extends Controller
         }
 
         $user->save();
-        $user->assignRole($validated['role']);
+        $user->assignRole($dynamicRole);
 
         EmployeeProfile::create([
             'user_id' => $user->id,
@@ -140,8 +144,9 @@ class EmployeeController extends Controller
         $designations = Designation::all();
         $managers = User::role(['manager', 'hr'])->get();
         $shifts = Shift::all();
+        $roles = \Spatie\Permission\Models\Role::all();
         
-        return view('employees.edit', compact('employee', 'departments', 'designations', 'managers', 'shifts'));
+        return view('employees.edit', compact('employee', 'departments', 'designations', 'managers', 'shifts', 'roles'));
     }
 
     public function update(Request $request, $id)
@@ -152,12 +157,19 @@ class EmployeeController extends Controller
             'password' => 'nullable|string|min:8|confirmed',
         ]);
         
-        $user->update($request->only([
+        
+        $dynamicRole = $request->role ?? $user->roles->first()->name ?? $user->role;
+        $dbRole = in_array($dynamicRole, ['super_admin', 'admin', 'hr', 'manager', 'employee']) ? $dynamicRole : 'employee';
+        
+        $updateData = $request->only([
             'name', 'phone', 'date_of_birth', 'gender', 'marital_status', 'children_count',
-            'role', 'department_id', 'designation_id', 'manager_id', 'shift_id', 'date_of_joining'
-        ]));
+            'department_id', 'designation_id', 'manager_id', 'shift_id', 'date_of_joining'
+        ]);
+        $updateData['role'] = $dbRole;
 
-        if (in_array($request->role ?? $user->role, ['manager', 'hr'])) {
+        $user->update($updateData);
+
+        if (in_array($dynamicRole, ['manager', 'hr'])) {
             $user->manager_id = null;
             $user->save();
         }

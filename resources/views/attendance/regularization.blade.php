@@ -2,10 +2,15 @@
 @section('title', 'Attendance Regularization')
 
 @section('content')
-<div class="grid grid-cols-3 gap-6">
-    <div class="card" style="grid-column: span 1">
-        <div class="card-header"><h3 class="card-title">Apply Regularization</h3></div>
-        <div class="card-body">
+<div style="display:flex; flex-wrap:wrap; gap:1.5rem;">
+    <div class="card" style="flex: 1; min-width: 300px; margin-bottom:0;">
+        <div class="card-header mobile-toggle-header" onclick="if(true) { const b=document.getElementById('reg-form'); b.style.display=b.style.display==='block'?'none':'block'; this.querySelector('.mobile-chevron').style.transform=b.style.display==='block'?'rotate(0deg)':'rotate(-90deg)'; }">
+            <h3 class="card-title" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin:0;">
+                <span>Apply Regularization</span>
+                <i class="fas fa-chevron-down mobile-chevron" style="transition:0.3s; transform:rotate(-90deg);"></i>
+            </h3>
+        </div>
+        <div class="card-body mobile-collapsible-body" id="reg-form">
             <form action="{{ route('regularization.store') }}" method="POST">
                 @csrf
                 <div class="form-group">
@@ -31,9 +36,14 @@
         </div>
     </div>
 
-    <div class="card" style="grid-column: span 2">
-        <div class="card-header"><h3 class="card-title">My Requests</h3></div>
-        <div class="table-responsive">
+    <div class="card" style="flex: 2; min-width: 300px; margin-bottom:0;">
+        <div class="card-header mobile-toggle-header" onclick="if(true) { const b=document.getElementById('reg-reqs'); b.style.display=b.style.display==='block'?'none':'block'; this.querySelector('.mobile-chevron').style.transform=b.style.display==='block'?'rotate(0deg)':'rotate(-90deg)'; }">
+            <h3 class="card-title" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin:0;">
+                <span>My Requests</span>
+                <i class="fas fa-chevron-down mobile-chevron" style="transition:0.3s; transform:rotate(-90deg);"></i>
+            </h3>
+        </div>
+        <div class="table-responsive mobile-collapsible-body" id="reg-reqs">
             <table class="table">
                 <thead>
                     <tr>

@@ -2,9 +2,9 @@
 @section('title', 'Roles & Permissions')
 
 @section('content')
-<div class="grid grid-cols-2 gap-6 mb-6">
-    <div class="card">
-        <div class="card-header"><h3 class="card-title">Add New Role</h3></div>
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem; mb-6;">
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header mobile-toggle-header"><h3 class="card-title">Add New Role</h3></div>
         <div class="card-body">
             <form action="{{ route('roles.store_role') }}" method="POST" style="display: flex; gap: 1rem;">
                 @csrf
@@ -13,8 +13,8 @@
             </form>
         </div>
     </div>
-    <div class="card">
-        <div class="card-header"><h3 class="card-title">Add New Permission</h3></div>
+    <div class="card" style="margin-bottom: 0;">
+        <div class="card-header mobile-toggle-header"><h3 class="card-title">Add New Permission</h3></div>
         <div class="card-body">
             <form action="{{ route('roles.store_permission') }}" method="POST" style="display: flex; gap: 1rem;">
                 @csrf
@@ -25,20 +25,20 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 gap-6">
+<div style="display:grid; grid-template-columns: 1fr; gap:1.5rem;">
     <div class="card">
-        <div class="card-header" style="justify-content: space-between">
-            <h3 class="card-title">Role Permissions Management</h3>
-            <span class="text-sm text-muted">Use this panel to define securely what actions Employee, Manager, and HR roles can perform.</span>
+        <div class="card-header mobile-toggle-header" style="display:flex; flex-wrap:wrap; justify-content: space-between; align-items:center; gap:0.5rem;">
+            <h3 class="card-title" style="margin:0;">Role Permissions Management</h3>
+            <span class="text-sm text-muted" style="flex:1; min-width:260px;">Use this panel to define securely what actions Employee, Manager, and HR roles can perform.</span>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="padding:0;">
             <form action="{{ route('roles.update') }}" method="POST">
                 @csrf
-                <div class="table-responsive">
-                    <table class="table" style="table-layout: fixed;">
+                <div class="table-responsive" style="border:none; border-bottom:1px solid var(--border);">
+                    <table class="table" style="min-width:600px;">
                         <thead>
                             <tr style="background: var(--bg);">
-                                <th style="width: 30%;">Permission / Capability</th>
+                                <th style="min-width:200px;">Permission / Capability</th>
                                 @foreach($roles as $role)
                                 <th style="text-align: center; text-transform: capitalize; padding-bottom: 5px;">
                                     {{ $role->name }}
@@ -82,7 +82,7 @@
                     </table>
                 </div>
 
-                <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                <div style="padding: 1.5rem; display: flex; justify-content: center;">
                     <button type="submit" class="btn btn-primary" style="padding: 0.75rem 2rem; font-size: 1rem;">Save Permissions Matrix</button>
                 </div>
             </form>

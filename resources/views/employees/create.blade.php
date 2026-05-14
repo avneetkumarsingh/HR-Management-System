@@ -70,8 +70,10 @@
             <div class="form-group">
                 <label class="form-label">System Role</label>
                 <select name="role" class="form-select" required>
-                    <option value="employee">Employee</option>
-                    <option value="manager">Manager</option>
+                    <option value="">Select Role</option>
+                    @foreach($roles as $r)
+                        <option value="{{ $r->name }}">{{ ucwords(str_replace('_', ' ', $r->name)) }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="form-group">

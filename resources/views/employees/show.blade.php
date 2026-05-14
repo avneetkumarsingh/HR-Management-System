@@ -2,23 +2,27 @@
 @section('title', 'Employee Profile')
 
 @section('content')
-<div class="profile-header border">
-    <img src="{{ $employee->avatar_url }}" class="profile-avatar" alt="Avatar">
-    <div class="profile-info">
-        <h1 style="display:flex; align-items:center; gap:1rem">{{ $employee->name }}
-            <span class="badge {{ $employee->is_active ? 'badge-present' : 'badge-danger' }}">{{ $employee->is_active ? 'Active' : 'Inactive' }}</span>
+<div class="profile-header border" style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; text-align: center; background: var(--bg); padding: 1.5rem; border-radius: var(--radius-lg); margin-bottom: 1.5rem;">
+    <img src="{{ $employee->avatar_url }}" class="profile-avatar" alt="Avatar" style="width:100px; height:100px; border-radius:50%; margin:0 auto;">
+    <div class="profile-info" style="flex: 1 1 300px;">
+        <h1 style="display:flex; justify-content:center; align-items:center; gap:0.75rem; flex-wrap:wrap; font-size:1.5rem; margin-bottom:0.5rem;">
+            {{ $employee->name }}
+            <span class="badge {{ $employee->is_active ? 'badge-present' : 'badge-danger' }}" style="font-size:0.75rem">{{ $employee->is_active ? 'Active' : 'Inactive' }}</span>
         </h1>
-        <p>{{ $employee->employee_id }} &nbsp; | &nbsp; {{ $employee->department->name ?? 'N/A' }} &nbsp; | &nbsp; {{ $employee->designation->name ?? 'N/A' }}</p>
-        <p>Joined {{ $employee->date_of_joining ? $employee->date_of_joining->format('d M, Y') : 'N/A' }}</p>
+        <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:0.25rem;">{{ $employee->employee_id }} &nbsp; | &nbsp; {{ $employee->department->name ?? 'N/A' }}</p>
+        <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:0.25rem;">{{ $employee->designation->name ?? 'N/A' }}</p>
+        <p style="color:var(--text-muted); font-size:0.85rem; font-weight:500;">Joined {{ $employee->date_of_joining ? $employee->date_of_joining->format('d M, Y') : 'N/A' }}</p>
     </div>
-    <div style="margin-left:auto; display:flex; flex-direction:column; gap:0.5rem">
+    <div style="display:flex; flex-direction:column; gap:0.5rem; flex-wrap:wrap; justify-content:center; flex: 1 1 100%;">
         @if(auth()->user()->hasAnyRole(['admin', 'super_admin', 'hr']))
-        <a href="{{ route('employees.edit', $employee->id) }}" class="btn btn-outline">Edit</a>
-        <form action="{{ route('employees.destroy', $employee->id) }}" method="POST" onsubmit="return confirm('Deactivate this employee?')">
+        <a href="{{ $employee->id === auth()->id() ? route('profile.show') : route('employees.edit', $employee->id) }}" class="btn btn-outline" style="width:100%">Edit</a>
+        @if($employee->id !== auth()->id())
+        <form action="{{ route('employees.destroy', $employee->id) }}" method="POST" onsubmit="return confirm('Deactivate this employee?')" style="width:100%">
             @csrf
             @method('DELETE')
-            <button class="btn btn-danger btn-block">Deactivate</button>
+            <button class="btn btn-danger btn-block" style="width:100%">Deactivate</button>
         </form>
+        @endif
         @endif
     </div>
 </div>
@@ -30,8 +34,8 @@
 </div>
 
 <!-- Overview Tab -->
-<div id="overview" class="tab-pane active grid grid-cols-2 gap-6">
-    <div class="card">
+<div id="overview" class="tab-pane active" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:1.5rem;">
+    <div class="card" style="margin-bottom:0;">
         <div class="card-header"><h3 class="card-title">Contact & Personal</h3></div>
         <div class="card-body text-sm">
             <div class="flex justify-between mb-2">
@@ -120,7 +124,7 @@
 
 <!-- Leaves Tab -->
 <div id="leaves" class="tab-pane">
-    <div class="grid grid-cols-3 gap-4 mb-4">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
         @foreach($employee->leaveBalances as $bal)
         @if($bal->type->code === 'ML' && strtolower($employee->gender ?? '') !== 'female')
             @continue

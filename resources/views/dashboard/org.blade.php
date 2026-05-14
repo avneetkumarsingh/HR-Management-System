@@ -92,7 +92,7 @@
 
 @section('content')
 <style>
-/* Keka Org Dashboard Design Tokens & Layouts */
+/* Walkwel Org Dashboard Design Tokens & Layouts */
 :root {
     --primary-blue: #007bff;
     --success-green: #28a745;
@@ -130,7 +130,7 @@
 /* Metric Cards */
 .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     gap: 12px;
     margin-bottom: 2rem;
 }
@@ -171,9 +171,9 @@
     gap: 0.5rem;
 }
 .pending-actions-list {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 1rem;
 }
 .pending-action-item {
     display: flex;
@@ -183,10 +183,10 @@
     padding: 1rem;
     border: 1px solid var(--border);
     border-radius: 8px;
-    min-width: 120px;
     text-decoration: none;
     color: var(--text);
     transition: all 0.2s;
+    height: 100%;
 }
 .pending-action-item:hover {
     border-color: var(--primary);
@@ -216,7 +216,7 @@
 /* Quicklinks */
 .quicklinks-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 12px;
 }
 .quicklink-card {
@@ -253,7 +253,7 @@
 /* Analytics */
 .analytics-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 16px;
 }
 .chart-container {
@@ -292,7 +292,7 @@
 
     <!-- Pending Actions Panel -->
     <div class="panel-section" style="border-top: 4px solid var(--danger-red);">
-        <h3 class="panel-title">Pending actions</h3>
+        <h3 class="panel-title">Actions</h3>
         <div class="pending-actions-list">
             @foreach($pendingActions as $action)
             <a href="{{ $action['link'] ?? '#' }}" class="pending-action-item">
@@ -378,10 +378,6 @@
                 <div class="quicklink-icon"><i class="fas fa-bullhorn"></i></div>
                 <div class="quicklink-text">New announcement</div>
             </a>
-            <a href="{{ route('hr.hire') }}" class="quicklink-card">
-                <div class="quicklink-icon"><i class="fas fa-briefcase"></i></div>
-                <div class="quicklink-text">Keka Hire</div>
-            </a>
         </div>
     </div>
 </div>
@@ -439,7 +435,7 @@
 </div>
 
 <div id="Performance" class="org-tab-pane">
-    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
         
         <!-- Submit Performance Review Form -->
         <div class="panel-section" style="border-top: 4px solid var(--primary-blue); height: fit-content;">

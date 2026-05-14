@@ -35,8 +35,28 @@ class AttendanceController extends Controller
         return view('attendance.index', compact('attendances', 'stats', 'month', 'year'));
     }
 
+    private function verifyLocation(Request $request) {
+        $clientIp = $request->ip();
+
+        // IN PRODUCTION: You will replace this with your Office Router's static Public IP
+        // Example: $officeIps = ['203.0.113.42'];
+        // return in_array($clientIp, $officeIps);
+
+        // FOR LOCAL TESTING: Allow the local Wi-Fi subnet (192.168.0.x)
+        // If accessed via localhost, it resolves to 127.0.0.1
+        $officeSubnet = '192.168.0.';
+        
+        $isOnOfficeWifi = str_starts_with($clientIp, $officeSubnet) || in_array($clientIp, ['127.0.0.1', '::1']);
+
+        return $isOnOfficeWifi;
+    }
+
     public function checkIn(Request $request)
     {
+        if (!$this->verifyLocation($request)) {
+            return back()->with('error', 'Location Error: You must be connected to the Office Wi-Fi or physically within 100 meters of the office to Check In.');
+        }
+
         $user = Auth::user();
         $today = Carbon::today()->toDateString();
         $now = Carbon::now();
@@ -45,7 +65,7 @@ class AttendanceController extends Controller
             ['user_id' => $user->id, 'date' => $today],
             [
                 'check_in' => $now,
-                'status' => 'present', // simple logic: present. Real logic would check shift time
+                'status' => 'present',
                 'check_in_ip' => $request->ip(),
                 'shift_id' => $user->shift_id,
             ]
@@ -64,6 +84,10 @@ class AttendanceController extends Controller
 
     public function checkOut(Request $request)
     {
+        if (!$this->verifyLocation($request)) {
+            return back()->with('error', 'Location Error: You must be connected to the Office Wi-Fi or physically within 100 meters of the office to Check Out.');
+        }
+
         $user = Auth::user();
         $today = Carbon::today()->toDateString();
         $now = Carbon::now();
@@ -71,7 +95,7 @@ class AttendanceController extends Controller
         $attendance = Attendance::where('user_id', $user->id)->where('date', $today)->first();
 
         if (!$attendance || !$attendance->check_in) {
-            return back()->withArray(['error' => 'You must check in first.']);
+            return back()->with('error', 'You must check in first.');
         }
 
         $checkIn = Carbon::parse($attendance->check_in);
@@ -134,7 +158,7 @@ class AttendanceController extends Controller
             ->get() 
             ->keyBy(function($item) {
                 return \Carbon\Carbon::parse($item->date)->format('Y-m-d');
-            });
+            }); 
 
         $yearHolidays = \App\Models\Holiday::whereYear('date', $year)->orderBy('date')->get();
 
@@ -145,7 +169,7 @@ class AttendanceController extends Controller
                 'name' => 'Team Outing',
                 'date' => $outingDate->format('Y-m-d'),
                 'type' => 'event'
-            ]);
+            ]);   
         }          
         
         $yearHolidays = $yearHolidays->sortBy('date')->values();

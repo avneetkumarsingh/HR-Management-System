@@ -3,9 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ config('app.name', 'Walkwel AttendMS') }}</title>
+    <title>Walkwel AttendMS - @yield('title', 'Dashboard')</title>
+    
+    <!-- PWA Mobile App Support -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Walkwel">
+    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=Walkwel&background=007bff&color=fff&size=192">
+
     <!-- CSS -->
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ time() }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -116,9 +125,7 @@
                         @php $empApproved = \App\Models\LeaveRequest::where('user_id', auth()->id())->where('status', 'approved')->where('updated_at', '>', session('last_seen_leaves_at', now()->subDays(3)))->count(); @endphp
                         @if($empApproved > 0) <span style="margin-left:auto; background:#10b981; box-shadow: 0 0 8px #10b981; width:8px; height:8px; border-radius:50%; display:inline-block;" title="Leave successfully approved recently!"></span> @endif
                     </a>
-                    <a href="{{ route('holidays.index') }}" class="nav-item {{ request()->routeIs('holidays.index') ? 'active' : '' }}">
-                        Holidays
-                    </a>
+
                 </div>
 
                 @if(auth()->user()->hasAnyRole(['manager', 'admin', 'hr', 'super_admin']))
@@ -182,7 +189,7 @@
                             <div class="user-role">{{ str_replace('_', ' ', auth()->user()->role) }}</div>
                         </div>
                     </a>
-                    <form action="{{ route('logout') }}" method="POST" style="margin-left:auto;">
+                    <form action="{{ route('logout') }}" method="POST" style="margin-left:auto;" onsubmit="return confirm('Are you sure you want to securely log out?');">
                         @csrf
                         <button type="submit" class="btn-logout" title="Logout" style="font-size: 1.25rem;">
                             <i class="fas fa-sign-out-alt"></i>
@@ -199,7 +206,23 @@
                     <button class="toggle-sidebar" onclick="toggleSidebar()" style="margin-right: 1rem;">
                         <i class="fas fa-bars"></i>
                     </button>
-                    <button onclick="history.back()" style="margin-right: 1rem; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 35px; height: 35px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='var(--border)';" onmouseout="this.style.background='transparent';" title="Go Back">
+                    <!-- Mobile Brand Replacement -->
+                    <div class="mobile-brand" style="align-items:center; gap:8px;">
+                        <svg width="28" height="28" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+                            <g fill="var(--primary)" stroke="var(--primary)" stroke-width="13" stroke-linecap="round">
+                            <line x1="28" y1="38" x2="46" y2="82" />
+                            <line x1="48" y1="38" x2="66" y2="82" />
+                            <circle cx="76" cy="38" r="6.5" stroke="none" />
+                            <line x1="92" y1="38" x2="92" y2="82" />
+                            <circle cx="108" cy="38" r="6.5" stroke="none" />
+                            </g>
+                        </svg>
+                        <div style="display:flex; flex-direction:column; line-height:1.1;">
+                            <span style="font-size:0.9rem; font-weight:800; color:var(--text);">Walkwel</span>
+                            <span style="font-size:0.9rem; font-weight:800; color:var(--text); opacity:0.8;">AttendMS</span>
+                        </div>
+                    </div>
+                    <button class="topbar-back-btn" onclick="history.back()" style="margin-right: 1rem; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 35px; height: 35px; border-radius: 50%; transition: all 0.2s;" onmouseover="this.style.background='var(--border)';" onmouseout="this.style.background='transparent';" title="Go Back">
                         <i class="fas fa-arrow-left" style="font-size: 1.1rem;"></i>
                     </button>
                     <h2 class="page-title" style="margin: 0;">@yield('title')</h2>
@@ -214,18 +237,22 @@
                     @if(!$todayAtt || !$todayAtt->check_in)
                         <form action="{{ route('attendance.check_in') }}" method="POST" style="display:inline;">
                             @csrf
-                            <button type="submit" class="btn btn-checkin">Web Check-in</button>
+                            <input type="hidden" name="latitude" value="">
+                            <input type="hidden" name="longitude" value="">
+                            <button type="button" onclick="performLocationCheck(this.form)" class="btn btn-checkin"><span class="desktop-text">Web </span>Check-in</button>
                         </form>
                     @elseif($todayAtt->check_in && !$todayAtt->check_out)
                         <form action="{{ route('attendance.check_out') }}" method="POST" style="display:inline;">
                             @csrf
-                            <button type="submit" class="btn btn-checkout">Web Check-out</button>
+                            <input type="hidden" name="latitude" value="">
+                            <input type="hidden" name="longitude" value="">
+                            <button type="button" onclick="performLocationCheck(this.form)" class="btn btn-checkout"><span class="desktop-text">Web </span>Check-out</button>
                         </form>
                     @else
                         <button class="btn btn-outline" disabled>Check-in Done</button>
                     @endif
                     
-                    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                    <form action="{{ route('logout') }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to securely log out?');">
                         @csrf
                         <button type="submit" class="btn btn-outline" style="border:none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted);" title="Logout">
                             <i class="fas fa-sign-out-alt"></i>
@@ -240,8 +267,91 @@
         </main>
     </div>
 
+    <!-- Mobile Bottom Navigation Structure -->
+    <div class="mobile-submenu-overlay" id="mobile-submenu-overlay" onclick="closeAllMobileMenus()"></div>
+
+    <!-- My Data Submenu -->
+    <div class="mobile-submenu" id="mobile-submenu-my-data">
+        <div class="mobile-submenu-title">My Data</div>
+        <div class="submenu-grid">
+            <a href="{{ route('attendance.index') }}" class="submenu-item" onclick="closeAllMobileMenus()"><i class="fas fa-user-check"></i> Attendance</a>
+            <a href="{{ route('attendance.calendar') }}" class="submenu-item" onclick="closeAllMobileMenus()"><i class="fas fa-calendar-alt"></i> Calendar</a>
+            <a href="{{ route('regularization.index') }}" class="submenu-item" onclick="closeAllMobileMenus()"><i class="fas fa-clock"></i> Checks</a>
+            <a href="{{ route('leaves.index') }}" class="submenu-item" onclick="closeAllMobileMenus()"><i class="fas fa-plane-departure"></i> Leaves</a>
+        </div>
+    </div>
+
+    @if(auth()->user()->hasAnyRole(['manager', 'admin', 'hr', 'super_admin']))
+    <!-- Team & Approvals Submenu -->
+    <div class="mobile-submenu" id="mobile-submenu-team">
+        <div class="mobile-submenu-title">Team & Approvals</div>
+        <div class="submenu-grid">
+            <a href="{{ route('attendance.team') }}" class="submenu-item" onclick="closeAllMobileMenus()"><i class="fas fa-users"></i> Team Attd.</a>
+            <a href="{{ route('leaves.approvals') }}" class="submenu-item" onclick="closeAllMobileMenus()"><i class="fas fa-check-circle"></i> Leaves</a>
+            <a href="{{ route('regularization.approvals') }}" class="submenu-item" onclick="closeAllMobileMenus()"><i class="fas fa-check-square"></i> Regularize</a>
+            <a href="{{ route('hr.probations') }}" class="submenu-item" onclick="closeAllMobileMenus()"><i class="fas fa-chart-line"></i> Performance</a>
+        </div>
+    </div>
+    @endif
+
+    @if(auth()->user()->hasAnyRole(['admin', 'hr', 'super_admin']))
+    <!-- HR Admin Submenu -->
+    <div class="mobile-submenu" id="mobile-submenu-admin">
+        <div class="mobile-submenu-title">HR Administration</div>
+        <div class="submenu-grid">
+            <a href="{{ route('org.dashboard') }}" class="submenu-item" onclick="closeAllMobileMenus()"><i class="fas fa-building"></i> Dashboard</a>
+            <a href="{{ route('employees.index') }}" class="submenu-item" onclick="closeAllMobileMenus()"><i class="fas fa-user-tie"></i> Employees</a>
+            <a href="{{ route('roles.index') }}" class="submenu-item" onclick="closeAllMobileMenus()"><i class="fas fa-user-shield"></i> Roles</a>
+            <a href="{{ route('attendance.report') }}" class="submenu-item" onclick="closeAllMobileMenus()"><i class="fas fa-file-alt"></i> Reports</a>
+        </div>
+    </div>
+    @endif
+
+    <nav class="mobile-bottom-nav">
+        <a href="{{ route('dashboard') }}" class="mobile-nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}" onclick="closeAllMobileMenus()">
+            <i class="fas fa-home"></i>
+            <span>Main</span>
+        </a>
+        <div class="mobile-nav-item {{ request()->routeIs('attendance.*') || request()->routeIs('regularization.index') || request()->routeIs('leaves.index') ? 'active' : '' }}" onclick="toggleMobileMenu('my-data')">
+            <i class="fas fa-user-clock"></i>
+            <span>My Data</span>
+        </div>
+        
+        @if(auth()->user()->hasAnyRole(['manager', 'admin', 'hr', 'super_admin']))
+        <div class="mobile-nav-item {{ request()->routeIs('attendance.team') || request()->routeIs('leaves.approvals') || request()->routeIs('regularization.approvals') || request()->routeIs('hr.probations') ? 'active' : '' }}" onclick="toggleMobileMenu('team')">
+            <i class="fas fa-users-cog"></i>
+            <span>Team</span>
+        </div>
+        @endif
+
+        @if(auth()->user()->hasAnyRole(['admin', 'hr', 'super_admin']))
+        <div class="mobile-nav-item {{ request()->routeIs('org.dashboard') || request()->routeIs('employees.*') || request()->routeIs('roles.*') || request()->routeIs('reports.*') ? 'active' : '' }}" onclick="toggleMobileMenu('admin')">
+            <i class="fas fa-building"></i>
+            <span>Admin</span>
+        </div>
+        @endif
+    </nav>
+
     <!-- JS -->
     <script>
+        function toggleMobileMenu(id) {
+            const menu = document.getElementById('mobile-submenu-' + id);
+            const overlay = document.getElementById('mobile-submenu-overlay');
+            if (menu && menu.classList.contains('show')) {
+                closeAllMobileMenus();
+            } else {
+                closeAllMobileMenus();
+                if(menu) menu.classList.add('show');
+                if(overlay) overlay.classList.add('show');
+            }
+        }
+
+        function closeAllMobileMenus() {
+            document.querySelectorAll('.mobile-submenu').forEach(m => m.classList.remove('show'));
+            const overlay = document.getElementById('mobile-submenu-overlay');
+            if(overlay) overlay.classList.remove('show');
+        }
+
         // Live Clock
         function updateClock() {
             const now = new Date();
@@ -251,10 +361,21 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Sidebar Toggle
+        // Sidebar Toggle & Dismissal
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('show');
         }
+
+        // Close sidebar when clicking on the content overlay (outside sidebar) on mobile
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768) {
+                const sidebar = document.getElementById('sidebar');
+                const toggleBtn = e.target.closest('.toggle-sidebar');
+                if (sidebar.classList.contains('show') && !sidebar.contains(e.target) && !toggleBtn) {
+                    sidebar.classList.remove('show');
+                }
+            }
+        });
 
         // Flash auto dismiss
         function closeFlash() {
@@ -283,6 +404,32 @@
             document.getElementById(id).classList.remove('show');
         }
 
+        // HTML5 Geolocation Interceptor for Check-in / Check-out
+        function performLocationCheck(form) {
+            if (navigator.geolocation) {
+                const btn = form.querySelector('button');
+                const origText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Locating...';
+                btn.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        form.querySelector('input[name="latitude"]').value = position.coords.latitude;
+                        form.querySelector('input[name="longitude"]').value = position.coords.longitude;
+                        form.submit();
+                    },
+                    function(error) {
+                        // Denied or failed GPS. Submit anyway to let the Server-side Wi-Fi IP validation decide.
+                        console.warn("GPS Unavailable. Falling back strictly to Wi-Fi IP validation.");
+                        form.submit(); 
+                    },
+                    { timeout: 8000, enableHighAccuracy: true }
+                );
+            } else {
+                form.submit();
+            }
+        }
+
         // Seamless AJAX SPA Engine
         document.addEventListener('click', function(e) {
             const link = e.target.closest('a');
@@ -296,17 +443,36 @@
 
             e.preventDefault();
             
-            // Update sidebar highlighting instantly if applicable
             if (link.classList.contains('nav-item')) {
+                // Ensure sidebar gracefully closes on mobile after selection
+                if (window.innerWidth <= 768) {
+                    document.getElementById('sidebar').classList.remove('show');
+                }
+                
                 document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
                 link.classList.add('active');
                 
                 // Instantly clear notification dots/badges visually for the clicked item
                 const notifSpans = link.querySelectorAll('span');
                 notifSpans.forEach(span => {
-                    // Only clear the simple notification dots or badges (avoid text/icons if they exist)
                     if (span.style.borderRadius) span.remove();
                 });
+            }
+
+            // Sync Mobile Bottom Nav Active States dynamically
+            if (link.classList.contains('submenu-item') || link.classList.contains('mobile-nav-item')) {
+                document.querySelectorAll('.mobile-nav-item').forEach(el => el.classList.remove('active'));
+                
+                if (link.classList.contains('mobile-nav-item') && !link.hasAttribute('onclick')) {
+                    link.classList.add('active'); // 'Main' tab directly maps
+                } else {
+                    const parentMenu = link.closest('.mobile-submenu');
+                    if (parentMenu) {
+                        const menuId = parentMenu.id.replace('mobile-submenu-', '');
+                        const matchingTab = Array.from(document.querySelectorAll('.mobile-nav-item')).find(el => el.getAttribute('onclick') && el.getAttribute('onclick').includes(menuId));
+                        if (matchingTab) matchingTab.classList.add('active');
+                    }
+                }
             }
 
             // Visual feedback
@@ -332,6 +498,7 @@
                     const newContent = doc.querySelector('.content-area');
                     if (newContent) {
                         contentArea.innerHTML = newContent.innerHTML;
+                        if (typeof initMobileCardToggles === 'function') setTimeout(initMobileCardToggles, 50);
                     }
 
                     // Hot Swap Topbar Title
@@ -373,6 +540,44 @@
         window.addEventListener('popstate', function() {
             window.location.reload();
         });
+
+        function initMobileCardToggles() {
+            document.querySelectorAll('.card').forEach(card => {
+                if (card.querySelector('.mobile-toggle-header')) return; // Already explicitly processed
+                if (card.classList.contains('hero-card') || card.classList.contains('leave-card')) return;
+                
+                let header = card.querySelector('.card-header');
+                if (!header) return;
+                
+                // Do not auto-collapse complex headers with active buttons (like generic_modules with Add New)
+                // This prevents the dynamic chevron from corrupting the flex layout and overlapping the action radius.
+                if (header.querySelector('button') || header.querySelector('.btn')) return;
+                
+                let body = card.querySelector('.card-body, .table-responsive, .calendar-grid, ul');
+                if (!body) return;
+                
+                body.classList.add('mobile-collapsible-body');
+                
+                let title = header.querySelector('h3, .card-title');
+                if (title && !header.querySelector('.mobile-chevron')) {
+                    title.style.display = 'flex';
+                    title.style.justifyContent = 'space-between';
+                    title.style.alignItems = 'center';
+                    title.style.width = '100%';
+                    title.insertAdjacentHTML('beforeend', '<i class="fas fa-chevron-down mobile-chevron" style="transition:0.3s; transform:rotate(-90deg);"></i>');
+                }
+                
+                header.classList.add('mobile-toggle-header');
+                header.onclick = function(e) {
+                    if (e.target.closest('a') || e.target.closest('button')) return;
+                    let isHidden = window.getComputedStyle(body).display === 'none';
+                    body.style.display = isHidden ? 'block' : 'none';
+                    let icon = header.querySelector('.mobile-chevron');
+                    if (icon) icon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';
+                };
+            });
+        }
+        document.addEventListener('DOMContentLoaded', initMobileCardToggles);
     </script>
     @stack('scripts')
     <script>
@@ -398,6 +603,17 @@
             if (contentArea) {
                 observer.observe(contentArea, { childList: true, subtree: false });
             }
+        }
+    </script>
+
+    <!-- PWA Installation Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Walkwel Mobile App registered successfully.'))
+                .catch(err => console.warn('PWA registration failed: ', err));
+            });
         }
     </script>
 </body>

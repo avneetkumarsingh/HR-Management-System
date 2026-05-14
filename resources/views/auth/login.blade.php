@@ -51,15 +51,14 @@
                     <div class="form-group">
                         <label class="form-label">Email Address</label>
                         <div class="input-wrapper">
-                            <input type="password" name="email" id="email" class="form-input" value="{{ old('email') }}" required>
-                            <i class="fas fa-eye icon-right" onclick="toggleField('email', this)"></i>
+                            <input type="email" name="email" id="email" class="form-input" value="{{ old('email') }}" required style="padding-left: 1rem;">
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label">Password</label>
                         <div class="input-wrapper">
-                            <input type="password" name="password" id="password" class="form-input" value="" required>
+                            <input type="password" name="password" id="password" class="form-input" value="" required style="padding-left: 1rem; padding-right: 2.5rem;">
                             <i class="fas fa-eye icon-right" onclick="toggleField('password', this)"></i>
                         </div>
                     </div>
@@ -82,7 +81,7 @@
         function toggleField(fieldId, icon) {
             var input = document.getElementById(fieldId);
             if (input.type === 'password') {
-                input.type = (fieldId === 'email') ? 'email' : 'text';
+                input.type = 'text';
                 icon.classList.remove('fa-eye');
                 icon.classList.add('fa-eye-slash');
             } else {

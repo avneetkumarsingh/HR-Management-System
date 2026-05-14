@@ -3,8 +3,13 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header"><h3 class="card-title">Pending Regularization Requests</h3></div>
-    <div class="card-body">
+    <div class="card-header mobile-toggle-header" onclick="if(true) { const b=document.getElementById('reg-apprs'); b.style.display=b.style.display==='block'?'none':'block'; this.querySelector('.mobile-chevron').style.transform=b.style.display==='block'?'rotate(0deg)':'rotate(-90deg)'; }">
+        <h3 class="card-title" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin:0;">
+            <span>Pending Requests</span>
+            <i class="fas fa-chevron-down mobile-chevron" style="transition:0.3s; transform:rotate(-90deg);"></i>
+        </h3>
+    </div>
+    <div class="card-body mobile-collapsible-body" id="reg-apprs">
         @if(count($requests) > 0)
             <div style="overflow-x:auto;">
                 <table style="width:100%; text-align:left; border-collapse:collapse;">

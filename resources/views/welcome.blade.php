@@ -343,7 +343,7 @@
             <div class="feature-card">
                 <div class="card-icon icon-rose"></div>
                 <h3>Rich Analytics</h3>
-                <p>Enterprise-grade dashboards with Keka-inspired metric visualization and demographics.</p>
+                <p>Enterprise-grade dashboards with Walkwel-inspired metric visualization and demographics.</p>
             </div>
         </div>
     </div>

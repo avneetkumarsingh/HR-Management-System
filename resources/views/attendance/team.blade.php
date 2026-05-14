@@ -2,10 +2,10 @@
 @section('title', 'Team Attendance')
 
 @section('content')
-<div class="filter-bar">
-    <form action="" method="GET" style="display:flex; gap:1rem; align-items:center;">
-        <input type="date" name="date" class="form-input" value="{{ $date }}" style="max-width:200px">
-        <button type="submit" class="btn btn-primary">Filter</button>
+<div class="filter-bar" style="flex-wrap: wrap;">
+    <form action="" method="GET" style="display:flex; flex-wrap:wrap; gap:1rem; align-items:center; width:100%;">
+        <input type="date" name="date" class="form-input" value="{{ $date }}" style="flex:1; min-width:150px">
+        <button type="submit" class="btn btn-primary" style="flex:1; min-width:100px;">Filter</button>
     </form>
 </div>
 
@@ -14,19 +14,17 @@
 @endphp
 
 <style>
-    .rotate-180 { transform: rotate(180deg); }
-    .hidden-block { display: none !important; }
+    /* Legacy hidden-block overrides removed to support universal toggle handler */
 </style>
 
 @forelse($groupedTeam as $groupName => $members)
 <div class="card mb-6">
-    <div class="card-header" style="background: rgba(0,0,0,0.02); cursor: pointer;" onclick="document.getElementById('team-{{ \Illuminate\Support\Str::slug($groupName) }}').classList.toggle('hidden-block'); this.querySelector('i').classList.toggle('rotate-180')">
-        <h3 class="card-title" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+    <div class="card-header" style="background: rgba(0,0,0,0.02); cursor: pointer;">
+        <h3 class="card-title">
             <span>{{ $groupName }} <span class="badge" style="background:var(--border); margin-left:10px">{{ count($members) }} Members</span></span>
-            <i class="fas fa-chevron-down rotate-180" style="transition: transform 0.3s ease;"></i>
         </h3>
     </div>
-    <div id="team-{{ \Illuminate\Support\Str::slug($groupName) }}" class="table-responsive hidden-block">
+    <div id="team-{{ \Illuminate\Support\Str::slug($groupName) }}" class="table-responsive">
         <table class="table">
             <thead>
                 <tr>

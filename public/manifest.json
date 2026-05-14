@@ -1,0 +1,23 @@
+{
+  "short_name": "Walkwel",
+  "name": "Walkwel AttendMS",
+  "icons": [
+    {
+      "src": "https://ui-avatars.com/api/?name=Walkwel&background=007bff&color=fff&size=192",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://ui-avatars.com/api/?name=Walkwel&background=007bff&color=fff&size=512",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/dashboard",
+  "background_color": "#f8f9fa",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#007bff",
+  "orientation": "portrait",
+  "description": "Enterprise Grade Attendance and HR Management Mobile Suite"
+}

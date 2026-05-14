@@ -8,6 +8,7 @@ use Spatie\Permission\Models\Permission;
 
 class RolePermissionController extends Controller
 {
+
     public function index()
     {
         // Seed default foundational permissions if they do not exist
@@ -77,9 +78,13 @@ class RolePermissionController extends Controller
 
     public function destroyRole($id)
     {
+        if (!auth()->user() || !auth()->user()->hasAnyRole(['hr', 'admin', 'super_admin'])) {
+            abort(403, 'UNAUTHORIZED: Only HR administrators can manage and delete roles.');
+        }
+
         $role = Role::findOrFail($id);
-        if(in_array($role->name, ['hr', 'manager', 'employee'])) {
-            return back()->with('success', 'Cannot delete core system roles. You may only rename them.');
+        if(in_array($role->name, ['super_admin', 'admin', 'hr', 'manager', 'employee'])) {
+            return back()->with('error', 'Cannot delete core system roles.');
         }
         $role->delete();
         return back()->with('success', 'Role deleted successfully!');

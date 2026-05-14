@@ -2,21 +2,21 @@
 @section('title', 'My Attendance')
 
 @section('content')
-<div class="filter-bar">
-    <form action="{{ route('attendance.index') }}" method="GET" style="display:flex; gap:1rem; align-items:center; width:100%">
-        <select name="month" class="form-select" style="max-width:200px">
+<div class="filter-bar" style="flex-wrap: wrap;">
+    <form action="{{ route('attendance.index') }}" method="GET" style="display:flex; flex-wrap:wrap; gap:1rem; align-items:center; width:100%">
+        <select name="month" class="form-select" style="flex:1; min-width:120px;">
             @for($i=1; $i<=12; $i++)
                 <option value="{{ $i }}" {{ $month == $i ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $i, 1)) }}</option>
             @endfor
         </select>
-        <select name="year" class="form-select" style="max-width:150px">
+        <select name="year" class="form-select" style="flex:1; min-width:100px;">
             @for($i=date('Y'); $i>=date('Y')-2; $i--)
                 <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>{{ $i }}</option>
             @endfor
         </select>
-        <button type="submit" class="btn btn-primary">Filter</button>
+        <button type="submit" class="btn btn-primary" style="flex:1; min-width:100px;">Filter</button>
         
-        <div style="margin-left:auto; display:flex; gap:0.5rem">
+        <div style="width:100%; display:flex; flex-wrap:wrap; gap:0.5rem; align-items:center; justify-content:center; margin-top:0.5rem;">
             <span class="badge badge-present">Present: {{ $stats['present'] }}</span>
             <span class="badge badge-absent">Absent: {{ $stats['absent'] }}</span>
             <span class="badge badge-leave">Leave: {{ $stats['leave'] }}</span>
@@ -26,7 +26,13 @@
 </div>
 
 <div class="card">
-    <div class="table-responsive">
+    <div class="card-header mobile-toggle-header" style="border-bottom:1px solid var(--border);" onclick="if(true) { const b=document.getElementById('att-tab'); b.style.display=b.style.display==='block'?'none':'block'; this.querySelector('.mobile-chevron').style.transform=b.style.display==='block'?'rotate(0deg)':'rotate(-90deg)'; }">
+        <h3 class="card-title" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin:0;">
+            <span>Attendance Log</span>
+            <i class="fas fa-chevron-down mobile-chevron" style="transition:0.3s; transform:rotate(-90deg);"></i>
+        </h3>
+    </div>
+    <div class="table-responsive mobile-collapsible-body" id="att-tab">
         <table class="table">
             <thead>
                 <tr>

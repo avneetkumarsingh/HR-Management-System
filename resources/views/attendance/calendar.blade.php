@@ -2,7 +2,7 @@
 @section('title', 'Attendance Calendar')
 
 @section('content')
-<div class="filter-bar justify-between">
+<div class="filter-bar" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:1rem;">
     <h3 style="margin:0; font-size:1.25rem">{{ date('F Y', mktime(0, 0, 0, $month, 1, $year)) }}</h3>
     <div style="display:flex; gap:0.5rem">
         <a href="{{ route('attendance.calendar', ['month' => $month == 1 ? 12 : $month-1, 'year' => $month == 1 ? $year-1 : $year]) }}" class="btn btn-outline">Prev</a>
@@ -10,24 +10,28 @@
     </div>
 </div>
 
-<div style="display:flex; gap:1.5rem; margin-bottom:2rem;">
-    <div class="card" id="card-attendance" onclick="showCalendar('attendance')" style="flex:1; padding:2rem; text-align:center; cursor:pointer; border: 2px solid var(--primary); transition:all 0.2s;">
+<div style="display:flex; flex-wrap:wrap; gap:1.5rem; margin-bottom:2rem;">
+    <div class="card" id="card-attendance" onclick="showCalendar('attendance')" style="flex:1; min-width: 250px; padding:2rem; text-align:center; cursor:pointer; border: 2px solid var(--primary); transition:all 0.2s;">
         <h3 style="margin:0 0 0.5rem;">Attendance Calendar</h3>
         <div style="font-size:0.9rem; color:var(--text-muted)">View your precise daily check-ins and work hours.</div>
     </div>
-    <div class="card" id="card-holiday" onclick="showCalendar('holiday')" style="flex:1; padding:2rem; text-align:center; cursor:pointer; border: 2px solid transparent; transition:all 0.2s;">
+    <div class="card" id="card-holiday" onclick="showCalendar('holiday')" style="flex:1; min-width: 250px; padding:2rem; text-align:center; cursor:pointer; border: 2px solid transparent; transition:all 0.2s;">
         <h3 style="margin:0 0 0.5rem;">Holidays & Events</h3>
         <div style="font-size:0.9rem; color:var(--text-muted)">View national holidays and team scheduled outings.</div>
     </div>
 </div>
 
 <div id="calendar-attendance" style="display:block;">
-    <div style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1.5rem;">
-        <div class="card" style="margin-bottom:0">
-            <div class="card-header" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 class="card-title" style="margin: 0;">Attendance Calendar</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 1.5rem;">
+        <div class="card" style="margin-bottom:0; flex: 2; min-width: 300px;">
+            <div class="card-header mobile-toggle-header" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;" onclick="if(true) { const b=document.getElementById('c-att-c'); b.style.display=b.style.display==='block'?'none':'block'; this.querySelector('.mobile-chevron').style.transform=b.style.display==='block'?'rotate(0deg)':'rotate(-90deg)'; }">
+                <h3 class="card-title" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin: 0;">
+                    <span>Attendance Calendar</span>
+                    <i class="fas fa-chevron-down mobile-chevron" style="transition:0.3s; transform:rotate(-90deg);"></i>
+                </h3>
             </div>
-            <div class="calendar-grid">
+            <div style="overflow-x: auto;" class="mobile-collapsible-body" id="c-att-c">
+            <div class="calendar-grid" style="min-width: 600px;">
                 <div class="calendar-header-cell">Sun</div>
                 <div class="calendar-header-cell">Mon</div>
                 <div class="calendar-header-cell">Tue</div>
@@ -68,12 +72,17 @@
             @endfor
         </div>
         </div>
+        </div>
         
-        <div class="card" style="margin-bottom:0">
-            <div class="card-header" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 class="card-title" style="margin: 0;">This Month's Summary</h3>
+        <div class="card" style="margin-bottom:0; flex: 1; min-width: 300px;">
+            <div class="card-header mobile-toggle-header" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;" onclick="if(true) { const b=document.getElementById('c-att-s'); b.style.display=b.style.display==='block'?'none':'block'; this.querySelector('.mobile-chevron').style.transform=b.style.display==='block'?'rotate(0deg)':'rotate(-90deg)'; }">
+                <h3 class="card-title" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin: 0;">
+                    <span>This Month's Summary</span>
+                    <i class="fas fa-chevron-down mobile-chevron" style="transition:0.3s; transform:rotate(-90deg);"></i>
+                </h3>
             </div>
             
+            <div class="mobile-collapsible-body" id="c-att-s">
             @php
                 $present = clone $attendances;
                 $present = $present->where('status', 'present')->count();
@@ -112,16 +121,21 @@
                     <div style="font-size:1.5rem; font-weight:700; color:#f59e0b;">{{ $leave }}</div>
                 </div>
             </div>
+            </div>
         </div>
     </div>
 </div>
     
 <div id="calendar-holiday" style="display:none;">
-    <div style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1.5rem;">
-        <div class="card" style="margin-bottom:0">
-            <div class="card-header" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 class="card-title" style="margin: 0;">Event & Holiday Calendar</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 1.5rem;">
+        <div class="card" style="margin-bottom:0; flex: 2; min-width: 300px;">
+            <div class="card-header mobile-toggle-header" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;" onclick="if(true) { const b=document.getElementById('c-hol-c'); b.style.display=b.style.display==='block'?'none':'block'; this.querySelector('.mobile-chevron').style.transform=b.style.display==='block'?'rotate(0deg)':'rotate(-90deg)'; }">
+                <h3 class="card-title" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin: 0;">
+                    <span>Event & Holiday Calendar</span>
+                    <i class="fas fa-chevron-down mobile-chevron" style="transition:0.3s; transform:rotate(-90deg);"></i>
+                </h3>
             </div>
+            <div style="overflow-x: auto;" class="mobile-collapsible-body" id="c-hol-c">
             <div class="calendar-grid">
                 <div class="calendar-header-cell">Sun</div>
                 <div class="calendar-header-cell">Mon</div>
@@ -151,13 +165,18 @@
                     </div>
                 @endfor
             </div>
+            </div>
         </div>
 
-        <div class="card" style="margin-bottom:0">
-            <div class="card-header" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;">
-                <h3 class="card-title" style="margin: 0;">This Month's Events</h3>
+        <div class="card" style="margin-bottom:0; flex: 1; min-width: 300px;">
+            <div class="card-header mobile-toggle-header" style="border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 1rem;" onclick="if(true) { const b=document.getElementById('c-hol-s'); b.style.display=b.style.display==='block'?'none':'block'; this.querySelector('.mobile-chevron').style.transform=b.style.display==='block'?'rotate(0deg)':'rotate(-90deg)'; }">
+                <h3 class="card-title" style="display:flex; justify-content:space-between; align-items:center; width:100%; margin: 0;">
+                    <span>This Month's Events</span>
+                    <i class="fas fa-chevron-down mobile-chevron" style="transition:0.3s; transform:rotate(-90deg);"></i>
+                </h3>
             </div>
             
+            <div class="mobile-collapsible-body" id="c-hol-s">
             <div class="card-body" style="display:flex; flex-direction:column; gap:1.0rem; padding-top:0;">
                 @php
                     $thisMonthHols = collect($holidays)->filter(function($hol, $date) use ($year, $month) {
@@ -192,6 +211,7 @@
                         No holidays or events scheduled for this month.
                     </div>
                 @endif
+            </div>
             </div>
         </div>
     </div>

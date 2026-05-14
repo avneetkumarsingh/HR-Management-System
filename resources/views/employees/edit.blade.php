@@ -82,8 +82,8 @@
             <div class="form-group">
                 <label class="form-label">System Role</label>
                 <select name="role" class="form-select" required>
-                    @foreach(['employee', 'manager'] as $role)
-                        <option value="{{ $role }}" {{ $employee->role == $role ? 'selected' : '' }}>{{ ucfirst(str_replace('_', ' ', $role)) }}</option>
+                    @foreach($roles as $r)
+                        <option value="{{ $r->name }}" {{ ($employee->roles->first()->name ?? $employee->role) == $r->name ? 'selected' : '' }}>{{ ucwords(str_replace('_', ' ', $r->name)) }}</option>
                     @endforeach
                 </select>
             </div>

@@ -182,8 +182,16 @@ class DashboardController extends Controller
             ->with('type')
             ->get();
             
-        $announcements = Announcement::with('author')->where('is_active', true)->latest()->take(3)->get();
-
+        if (in_array($user->role, ['admin', 'hr', 'super_admin']) || $user->hasAnyRole(['admin', 'hr', 'super_admin'])) {
+            $announcements = collect();
+        } else {
+            $announcements = Announcement::with('author')
+                ->where('is_active', true)
+                ->where('created_at', '>=', Carbon::now()->subMinute())
+                ->latest()
+                ->take(3)
+                ->get();
+        }
         return view('dashboard.index', compact(
             'user', 'todayAttendance', 'stats', 'upcomingHolidays', 
             'managerData', 'adminData', 'myLeaves', 'today', 'upcomingBirthdays', 'upcomingAnniversaries', 'announcements'

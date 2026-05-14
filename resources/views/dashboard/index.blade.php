@@ -72,7 +72,7 @@
             <h2>{{ \Carbon\Carbon::parse($today)->format('l, F j, Y') }}</h2>
             <p>Welcome back, {{ $user->name }}!</p>
             
-            <div style="margin-top:2rem; display:flex; gap:2rem">
+            <div class="hero-times" style="margin-top:2rem; display:flex; gap:2rem">
                 <div>
                     <div style="font-size:0.85rem; opacity:0.8; margin-bottom:0.25rem">Check In</div>
                     <div style="font-size:1.25rem; font-weight:600">{{ $todayAttendance && $todayAttendance->check_in ? \Carbon\Carbon::parse($todayAttendance->check_in)->format('H:i') : '--:--' }}</div>
@@ -92,7 +92,7 @@
     </div>
 </div>
 
-<div class="stat-grid" style="display:grid; grid-template-columns: repeat(6, 1fr); gap: 1rem;">
+<div class="stat-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 1rem;">
     <div class="stat-card" style="flex-direction:column; align-items:flex-start; gap:0.75rem; padding:1.25rem">
         <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
             <div class="stat-label" style="margin:0; font-size:0.9rem; font-weight:600">Present</div>
@@ -153,20 +153,20 @@
     <div class="card-header"><h3 class="card-title">Your Log for Today</h3></div>
     <div class="card-body">
         @if($todayAttendance)
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem">
-                <div style="flex:1; min-width:150px; background:var(--bg); padding:1rem; border-radius:var(--radius-sm); text-align:center;">
+            <div class="log-grid">
+                <div style="flex:1; min-width:150px; background:var(--bg); padding:1.25rem; border-radius:var(--radius-sm); text-align:left;">
                     <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.25rem">Check In</div>
                     <div style="font-size:1.25rem; font-weight:600; color:var(--success)">
                         {{ $todayAttendance->check_in ? \Carbon\Carbon::parse($todayAttendance->check_in)->format('H:i A') : '--:--' }}
                     </div>    
                 </div>
-                <div style="flex:1; min-width:150px; background:var(--bg); padding:1rem; border-radius:var(--radius-sm); text-align:center;">
+                <div style="flex:1; min-width:150px; background:var(--bg); padding:1.25rem; border-radius:var(--radius-sm); text-align:left;">
                     <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.25rem">Check Out</div>
                     <div style="font-size:1.25rem; font-weight:600; color:var(--danger)">
                         {{ $todayAttendance->check_out ? \Carbon\Carbon::parse($todayAttendance->check_out)->format('H:i A') : '--:--' }}
                     </div>
                 </div>
-                <div style="flex:1; min-width:150px; background:var(--bg); padding:1rem; border-radius:var(--radius-sm); text-align:center;">
+                <div style="flex:1; min-width:150px; background:var(--bg); padding:1.25rem; border-radius:var(--radius-sm); text-align:left;">
                     <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.25rem">Total Effective Hours</div>
                     <div style="font-size:1.5rem; font-weight:700; color:var(--primary)">
                         @if($todayAttendance->check_out)
@@ -178,7 +178,7 @@
                 </div>
             </div>
             @if(!$todayAttendance->check_out)
-                <div style="margin-top:1rem; text-align:center; font-size:0.9rem; color:var(--text-muted)">
+                <div style="margin-top:1rem; text-align:left; font-size:0.9rem; color:var(--text-muted); padding-left: 0.5rem;">
                     Currently Clocked In
                 </div>
             @endif
@@ -324,33 +324,38 @@
 <script>
     // Live hours calc if checked in
     @if($todayAttendance && $todayAttendance->check_in && !$todayAttendance->check_out)
-        // Ensure timezone string is parsed safely by appending 'Z' or parsing local time if required
-        // Since we are generating the string from PHP, let's use the raw Unix timestamp directly to avoid JS timezone bugs
-        const checkInTime = {{ strtotime($todayAttendance->check_in) * 1000 }};
-        
-        function updateWorkingHours() {
-            const now = new Date().getTime();
-            // Since JS now() runs on the local PC clock and server clock might differ by a few seconds,
-            // we calculate the difference.
-            const diff = Math.max(0, now - checkInTime);
+        (function() {
+            const checkInTime = {{ strtotime($todayAttendance->check_in) * 1000 }};
             
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            function updateWorkingHours() {
+                const now = new Date().getTime();
+                const diff = Math.max(0, now - checkInTime);
+                
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                
+                const textToDisplay = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes);
+                
+                const liveEls = document.querySelectorAll('#live-hours, #live-hours-dashboard');
+                liveEls.forEach(el => { if(el) el.textContent = textToDisplay; });
+            }
             
-            const textToDisplay = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes);
-            
-            const liveEls = document.querySelectorAll('#live-hours, #live-hours-dashboard');
-            liveEls.forEach(el => { if(el) el.textContent = textToDisplay; });
-        }
-        
-        setInterval(updateWorkingHours, 1000); // Check more frequently so clock seems alive
-        updateWorkingHours();
-    @elseif($todayAttendance && $todayAttendance->check_out)
-        const h = {{ floor($todayAttendance->working_hours) }};
-        const m = {{ round(($todayAttendance->working_hours - floor($todayAttendance->working_hours)) * 60) }};
-        const statText = (h < 10 ? "0" + h : h) + ":" + (m < 10 ? "0" + m : m);
-        const liveEls = document.querySelectorAll('#live-hours, #live-hours-dashboard');
-        liveEls.forEach(el => { if(el) el.textContent = statText; });
+            if (window.workingHoursInterval) clearInterval(window.workingHoursInterval);
+            window.workingHoursInterval = setInterval(updateWorkingHours, 1000); 
+            updateWorkingHours();
+        })();
+    @else
+        (function() {
+            function updateRealTime() {
+                const now = new Date();
+                const statText = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const liveEls = document.querySelectorAll('#live-hours, #live-hours-dashboard');
+                liveEls.forEach(el => { if(el) el.textContent = statText; });
+            }
+            if (window.workingHoursInterval) clearInterval(window.workingHoursInterval);
+            window.workingHoursInterval = setInterval(updateRealTime, 1000);
+            updateRealTime();
+        })();
     @endif
 </script>
 @endpush

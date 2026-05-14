@@ -754,6 +754,13 @@ a:hover {
 }
 
 /* Dashboard Specifics */
+.log-grid {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 1rem;
+}
+
 .hero-card {
   background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 50%, var(--success) 100%);
   background-size: 200% 200%;
@@ -1190,8 +1197,67 @@ a:hover {
     margin-left: 0;
   }
 
+  .grid-cols-2, .grid-cols-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  .topbar {
+    padding: 0 1rem;
+    height: 60px;
+    gap: 1rem;
+  }
+
+  .topbar-left {
+    min-width: 0; /* allows child truncation */
+  }
+
+  .page-title {
+    font-size: 1.15rem !important;
+  }
+
+  .desktop-text {
+    display: none;
+  }
+
+  .log-grid {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+
+  .clock-widget {
+    display: none !important;
+  }
+
+  .btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .content-area {
+    padding: 1rem;
+  }
+
+  .hero-card .card-body {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .hero-info h2 {
+    font-size: 1.25rem;
+  }
+
+  .hero-times {
+    justify-content: center !important;
+  }
+
+  .hero-action {
+    text-align: center !important;
+  }
+
   .stat-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
   }
 
   .calendar-grid {
@@ -1202,4 +1268,65 @@ a:hover {
     flex-direction: column;
     text-align: center;
   }
+
+  /* Bottom Navigation Styles */
+  .sidebar { display: none !important; }
+  .toggle-sidebar { display: none !important; }
+  .main-wrapper { padding-bottom: 75px; }
+  .page-title { display: none !important; }
+  
+  .mobile-bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0; left: 0; right: 0; height: 65px;
+    background: var(--surface);
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+    border-top: 1px solid var(--border);
+  }
+  .mobile-nav-item {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: var(--text-muted); font-size: 0.65rem; font-weight: 600; gap: 4px; flex: 1; height: 100%; cursor: pointer; transition: all 0.2s; -webkit-tap-highlight-color: transparent; text-decoration: none;
+  }
+  .mobile-nav-item i { font-size: 1.25rem; }
+  .mobile-nav-item.active { color: var(--primary); }
+  .mobile-nav-item.active i { transform: translateY(-2px); }
+  
+  .mobile-submenu-overlay {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 65px; background: rgba(0,0,0,0.6); z-index: 998; backdrop-filter: blur(2px);
+  }
+  .mobile-submenu-overlay.show { display: block; animation: fadeIn 0.2s; }
+  
+  .topbar-back-btn { display: none !important; }
+
+  .mobile-submenu {
+    display: block !important;
+    position: fixed; bottom: -100%; left: 0; right: 0; background: var(--surface); z-index: 999;
+    border-radius: 20px 20px 0 0; padding: 1.5rem 1rem; transition: bottom 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 -10px 25px rgba(0,0,0,0.1);
+  }
+  .mobile-submenu.show { bottom: 65px; }
+  .mobile-submenu-title { font-size:0.8rem; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:1rem; padding-left:0.5rem; letter-spacing:0.05em;}
+  
+  .submenu-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:1rem;}
+  .submenu-item {
+    display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1rem;
+    background:var(--bg); border:1px solid var(--border); border-radius:12px; color:var(--text); text-decoration:none; gap:0.5rem; font-size:0.85rem; font-weight:600; text-align:center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  }
+  .submenu-item i { font-size:1.5rem; color:var(--primary); }
+  
+  .mobile-brand { display: flex !important; margin-right: auto !important; }
 }
+
+/* Global Collapsible Card Utilities */
+.mobile-collapsible-body { display: none; }
+.mobile-chevron { transform: rotate(-90deg); display: block !important; }
+.mobile-toggle-header { cursor: pointer; }
+
+@media (min-width: 769px) {
+  .mobile-bottom-nav, .mobile-brand, .mobile-submenu-overlay, .mobile-submenu { display: none !important; }
+}
+
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
