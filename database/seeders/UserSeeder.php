@@ -45,11 +45,11 @@ class UserSeeder extends Seeder
 
         $shift = Shift::firstOrCreate(['code' => 'GEN'], ['name' => 'General', 'start_time' => '09:00', 'end_time' => '18:00'])->id;
 
-        // Admin (Avneet)
-        if(!User::where('email', 'avneet@gmail.com')->exists()) {
+        // Admin (Admin)
+        if(!User::where('email', 'admin@gmail.com')->exists()) {
             $admin = User::create([
-                'name' => 'Avneet',
-                'email' => 'avneet@gmail.com',
+                'name' => 'Admin',
+                'email' => 'admin@gmail.com',
                 'password' => Hash::make('password'),
                 'employee_id' => 'EMP0001',
                 'role' => 'admin',
@@ -66,7 +66,7 @@ class UserSeeder extends Seeder
         // Dedicated HR User
         if(!User::where('email', 'hr@gmail.com')->exists()) {
             $hrUser = User::create([
-                'name' => 'HR Rep',
+                'name' => 'HR',
                 'email' => 'hr@gmail.com',
                 'password' => Hash::make('password'),
                 'employee_id' => 'HR0001',
