@@ -20,6 +20,7 @@ class UserSeeder extends Seeder
         $faker = Faker::create('en_IN');
         
         // Roles
+        $roleAdmin = Role::firstOrCreate(['name' => 'admin']);
         $roleHR = Role::firstOrCreate(['name' => 'hr']);
         $roleManager = Role::firstOrCreate(['name' => 'manager']);
         $roleEmployee = Role::firstOrCreate(['name' => 'employee']);
@@ -44,22 +45,40 @@ class UserSeeder extends Seeder
 
         $shift = Shift::firstOrCreate(['code' => 'GEN'], ['name' => 'General', 'start_time' => '09:00', 'end_time' => '18:00'])->id;
 
-        // HR Manager (Avneet)
+        // Admin (Avneet)
         if(!User::where('email', 'avneet@gmail.com')->exists()) {
             $admin = User::create([
                 'name' => 'Avneet',
                 'email' => 'avneet@gmail.com',
                 'password' => Hash::make('password'),
                 'employee_id' => 'EMP0001',
-                'role' => 'hr',
+                'role' => 'admin',
                 'department_id' => $deptHR->id,
                 'designation_id' => $desigHRM->id,
                 'shift_id' => $shift,
                 'date_of_joining' => '2023-01-01',
-                'date_of_birth' => now()->format('Y-m-d') // Give HR a birthday today to showcase the feature
+                'date_of_birth' => now()->format('Y-m-d')
             ]);
-            $admin->assignRole($roleHR);
+            $admin->assignRole($roleAdmin);
             EmployeeProfile::create(['user_id' => $admin->id]);
+        }
+
+        // Dedicated HR User
+        if(!User::where('email', 'hr@gmail.com')->exists()) {
+            $hrUser = User::create([
+                'name' => 'HR Rep',
+                'email' => 'hr@gmail.com',
+                'password' => Hash::make('password'),
+                'employee_id' => 'HR0001',
+                'role' => 'hr',
+                'department_id' => $deptHR->id,
+                'designation_id' => $desigHRM->id,
+                'shift_id' => $shift,
+                'date_of_joining' => '2023-01-10',
+                'date_of_birth' => now()->subYears(28)->format('Y-m-d')
+            ]);
+            $hrUser->assignRole($roleHR);
+            EmployeeProfile::create(['user_id' => $hrUser->id]);
         }
 
         // Managers and Employees will be manually created via HR Dashboard or Self-Registration
